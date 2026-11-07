@@ -22,7 +22,29 @@ export default function TripCapturePage() {
   const [compressedSizeKB, setCompressedSizeKB] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState(null);
+  const [gpsCoords, setGpsCoords] = useState(null);
+  const [gpsError, setGpsError] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Auto-acquire GPS stamp on page load (HTML5 Geolocation)
+  useEffect(() => {
+    if (typeof window !== "undefined" && "geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setGpsCoords({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            accuracy: pos.coords.accuracy
+          });
+        },
+        (err) => {
+          console.warn("GPS acquire warning:", err.message);
+          setGpsError("GPS gate stamp unavailable");
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     async function loadTripDetail() {
@@ -93,6 +115,11 @@ export default function TripCapturePage() {
     formData.append("client_upload_id", clientUploadId);
     formData.append("capture_time", captureTime);
     formData.append("file", capturedBlob, "pod.jpg");
+    if (gpsCoords) {
+      formData.append("latitude", gpsCoords.latitude.toString());
+      formData.append("longitude", gpsCoords.longitude.toString());
+      formData.append("gps_accuracy_meters", gpsCoords.accuracy.toString());
+    }
 
     try {
       const res = await uploadPodMultipart(formData, false);
@@ -139,10 +166,16 @@ export default function TripCapturePage() {
                 <span className="text-xs font-bold text-slate-400">{trip.trip_number}</span>
                 <h2 className="font-bold text-slate-900 text-lg leading-tight">{trip.customer_name}</h2>
                 <p className="text-xs text-slate-600">{trip.goods_description} • {trip.destination}</p>
+                <p className="text-[11px] font-mono text-slate-400 mt-0.5">e-Way Bill: {trip.eway_bill_number || "EWB-66120412"}</p>
               </div>
               <div className="text-right">
                 <span className="text-xs font-mono font-bold text-slate-700">{trip.vehicle_number}</span>
                 <p className="text-[11px] text-slate-400">Exp. LR: {trip.expected_lr_number || "N/A"}</p>
+                {gpsCoords && (
+                  <span className="inline-block mt-1 text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-mono">
+                    📍 GPS Acquired
+                  </span>
+                )}
               </div>
             </div>
           </div>
