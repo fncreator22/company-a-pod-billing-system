@@ -2,7 +2,7 @@
 ## Road Transport Fleet Proof-of-Delivery (POD) Capture and Billing System
 
 **Client:** Company A, Chhatrapati Sambhajinagar, Maharashtra  
-**GitHub Repository:** `https://github.com/your-username/road-transport-pod-system` *(Update before submission)*  
+**GitHub Repository:** `https://github.com/fncreator22/company-a-pod-billing-system`  
 **Live Application URL:** `http://localhost:3000` *(Local Turnkey Prototype)*  
 **Author:** Candidate (Software Engineering)  
 **Submission Requirement:** 1 of 2 in submission ZIP (TDD)
