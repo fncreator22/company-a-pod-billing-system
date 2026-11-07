@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.api.trips import router as trips_router
 
 app = FastAPI(
     title="Road Transport POD Management API",
@@ -15,6 +16,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(trips_router)
 
 @app.get("/api/health")
 async def health_check():
