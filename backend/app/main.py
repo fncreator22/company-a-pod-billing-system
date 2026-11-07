@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.api.trips import router as trips_router
 from app.api.pods import router as pods_router, limiter
 from app.api.review import router as review_router
+from app.api.audio import router as audio_router
 
 app = FastAPI(
     title="Road Transport POD Management API",
@@ -28,6 +29,7 @@ app.add_middleware(
 app.include_router(trips_router)
 app.include_router(pods_router)
 app.include_router(review_router)
+app.include_router(audio_router)
 
 @app.get("/api/health")
 async def health_check():
