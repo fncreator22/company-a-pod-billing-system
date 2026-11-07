@@ -5,17 +5,17 @@ import Sidebar from "@/components/Sidebar";
 
 export default function ShellLayout({ children }) {
   const pathname = usePathname();
-  // Driver routes are standalone mobile PWA views without desktop sidebar
-  const isDriverRoute = pathname.startsWith("/driver");
+  // Driver routes and public upload routes are standalone views without the executive sidebar
+  const isStandaloneRoute = pathname.startsWith("/driver") || pathname.startsWith("/upload") || pathname.startsWith("/portal");
 
-  if (isDriverRoute) {
+  if (isStandaloneRoute) {
     return <main className="min-h-screen bg-slate-50">{children}</main>;
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-zinc-50 font-sans">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1 w-full overflow-y-auto">{children}</main>
     </div>
   );
 }

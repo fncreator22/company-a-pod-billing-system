@@ -24,10 +24,13 @@ module.exports = {
           50: '#F8FAFC'
         },
         transport: {
-          blue: '#2563EB',
-          emerald: '#059669',
+          blue: '#1E293B',
+          navy: '#0F172A',
           amber: '#D97706',
-          crimson: '#DC2626'
+          orange: '#C2410C',
+          industrial: '#0F766E',
+          zinc: '#27272A',
+          charcoal: '#18181B'
         }
       }
     },
