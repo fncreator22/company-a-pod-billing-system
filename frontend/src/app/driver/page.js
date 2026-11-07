@@ -86,25 +86,25 @@ export default function DriverDashboard() {
   }
 
   return (
-    <div className="max-w-md mx-auto min-h-screen flex flex-col justify-between bg-slate-900 text-slate-100 font-sans pb-6">
+    <div className="max-w-md mx-auto min-h-screen flex flex-col justify-between bg-zinc-950 text-zinc-100 font-sans pb-6">
       <div>
         {/* Modern App Header Bar */}
-        <div className="bg-slate-900/90 backdrop-blur-md sticky top-0 z-20 border-b border-slate-800 p-4">
+        <div className="bg-zinc-900/90 backdrop-blur-md sticky top-0 z-20 border-b border-zinc-800 p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-transport-blue to-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+              <div className="w-11 h-11 rounded-2xl bg-zinc-850 border border-zinc-750 flex items-center justify-center text-amber-400 shadow-md">
                 <Truck className="w-6 h-6" />
               </div>
               <div>
                 <h1 className="font-bold text-sm tracking-tight text-white">{t.driverName}</h1>
-                <p className="text-[11px] text-slate-400 font-mono">{t.driverVehicle}</p>
+                <p className="text-[11px] text-zinc-400 font-mono">{t.driverVehicle}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setLang(lang === "en" ? "hi" : "en")}
-                className="text-xs bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold px-3 py-1.5 rounded-xl border border-slate-700 transition-colors shadow-sm"
+                className="text-xs bg-zinc-850 hover:bg-zinc-800 text-amber-400 font-bold px-3 py-1.5 rounded-xl border border-zinc-750 transition-colors shadow-sm"
               >
                 {lang === "en" ? "हिंदी" : "EN"}
               </button>
@@ -128,24 +128,24 @@ export default function DriverDashboard() {
                 <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
                 <span>{offlineCount} {t.pendingUploads}</span>
               </div>
-              <button onClick={loadTrips} className="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-3 py-1.5 rounded-xl text-xs shadow">
+              <button onClick={loadTrips} className="bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow">
                 {t.syncNow}
               </button>
             </div>
           )}
 
           {/* Section Hero Greeting */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-850 p-4 rounded-3xl border border-slate-700/70 shadow-md">
+          <div className="bg-zinc-900 p-4 rounded-3xl border border-zinc-800 shadow-md">
             <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block">Company A • Road Logistics</span>
             <h2 className="text-xl font-extrabold text-white mt-0.5">{t.title}</h2>
-            <p className="text-xs text-slate-400 mt-1">{t.subtitle}</p>
+            <p className="text-xs text-zinc-400 mt-1">{t.subtitle}</p>
           </div>
 
           {/* Trips Feed */}
           {loading ? (
             <div className="space-y-3 pt-2">
               {[1, 2].map((i) => (
-                <div key={i} className="h-36 bg-slate-800/50 animate-pulse rounded-3xl border border-slate-700/40" />
+                <div key={i} className="h-36 bg-zinc-900/60 animate-pulse rounded-3xl border border-zinc-800" />
               ))}
             </div>
           ) : error ? (
@@ -153,7 +153,7 @@ export default function DriverDashboard() {
               {error}
             </div>
           ) : trips.length === 0 ? (
-            <div className="text-center py-16 text-slate-500 text-sm">
+            <div className="text-center py-16 text-zinc-500 text-sm">
               No assigned trips currently.
             </div>
           ) : (
@@ -166,15 +166,15 @@ export default function DriverDashboard() {
                 return (
                   <div
                     key={trip.id}
-                    className="bg-slate-850 border border-slate-750 hover:border-slate-600 rounded-3xl p-5 shadow-lg transition-all"
+                    className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-3xl p-5 shadow-lg transition-all"
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <span className="text-[11px] font-mono font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md">
+                        <span className="text-[11px] font-mono font-bold text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-md">
                           {trip.trip_number}
                         </span>
                         <h3 className="font-bold text-white text-lg mt-1">{trip.customer_name}</h3>
-                        <p className="text-xs text-slate-300 font-medium">{trip.goods_description}</p>
+                        <p className="text-xs text-zinc-300 font-medium">{trip.goods_description}</p>
                       </div>
 
                       <div>
@@ -189,12 +189,12 @@ export default function DriverDashboard() {
                           </span>
                         )}
                         {isReview && (
-                          <span className="flex items-center gap-1.5 text-xs font-bold text-blue-400 bg-blue-950/80 border border-blue-800 px-3 py-1 rounded-full shadow-sm">
-                            <Clock className="w-4 h-4" /> {t.statusReview}
+                          <span className="flex items-center gap-1.5 text-xs font-bold text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded-full shadow-sm">
+                            <Clock className="w-4 h-4 text-amber-400" /> {t.statusReview}
                           </span>
                         )}
                         {!isVerified && !isRetake && !isReview && (
-                          <span className="text-xs font-bold text-amber-300 bg-amber-950/50 border border-amber-800/60 px-3 py-1 rounded-full">
+                          <span className="text-xs font-bold text-amber-400 bg-amber-950/50 border border-amber-800/60 px-3 py-1 rounded-full">
                             {t.statusPending}
                           </span>
                         )}
@@ -202,32 +202,32 @@ export default function DriverDashboard() {
                     </div>
 
                     {/* Metadata Pill Box */}
-                    <div className="bg-slate-800/80 rounded-2xl p-3 my-3 text-xs grid grid-cols-2 gap-2 text-slate-300 border border-slate-700/50">
+                    <div className="bg-zinc-950 rounded-2xl p-3 my-3 text-xs grid grid-cols-2 gap-2 text-zinc-300 border border-zinc-850">
                       <div className="flex items-center gap-1.5">
                         <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                         <span className="truncate">{trip.destination}</span>
                       </div>
-                      <div className="text-right font-mono font-bold text-slate-200">
+                      <div className="text-right font-mono font-bold text-zinc-200">
                         {trip.vehicle_number}
                       </div>
-                      <div className="text-[11px] text-slate-400">
-                        Exp Qty: <strong className="text-slate-200">{trip.expected_quantity} {trip.quantity_unit}</strong>
+                      <div className="text-[11px] text-zinc-400">
+                        Exp Qty: <strong className="text-zinc-200">{trip.expected_quantity} {trip.quantity_unit}</strong>
                       </div>
-                      <div className="text-[11px] text-right text-slate-400">
-                        LR: <span className="font-mono text-slate-200">{trip.expected_lr_number || "LR-8821"}</span>
+                      <div className="text-[11px] text-right text-zinc-400">
+                        LR: <span className="font-mono text-zinc-200">{trip.expected_lr_number || "LR-8821"}</span>
                       </div>
                     </div>
 
-                    {/* Touch Target Action Button */}
+                    {/* Industrial Amber Action Button */}
                     <Link
                       href={`/driver/trips/${trip.id}`}
-                      className="w-full bg-gradient-to-r from-blue-600 to-transport-blue hover:from-blue-500 hover:to-blue-600 text-white font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-between text-sm shadow-md shadow-blue-900/40 active:scale-[0.98] transition-transform"
+                      className="w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-between text-sm shadow-md shadow-amber-950/40 active:scale-[0.98] transition-transform"
                     >
                       <div className="flex items-center gap-2">
-                        <Camera className="w-5 h-5 text-amber-300" />
+                        <Camera className="w-5 h-5 text-zinc-950" />
                         <span>{t.captureCTA}</span>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-blue-200" />
+                      <ChevronRight className="w-5 h-5 text-zinc-900" />
                     </Link>
                   </div>
                 );
@@ -241,7 +241,7 @@ export default function DriverDashboard() {
       <div className="p-4 text-center">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-white transition-colors bg-slate-800/60 px-4 py-2 rounded-xl border border-slate-700"
+          className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-800"
         >
           <span>🏢 {t.switchExecutive}</span>
         </Link>
