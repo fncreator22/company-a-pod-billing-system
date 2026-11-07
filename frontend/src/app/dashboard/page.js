@@ -90,7 +90,7 @@ export default function ExecutiveDashboard() {
               <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Branch SLA Performance</span>
               <h3 className="font-bold text-sm mt-0.5">POD-to-Invoice Turnaround Time by Hub</h3>
             </div>
-            <div className="flex flex-wrap gap-4 text-xs">
+            <div className="flex flex-wrap items-center gap-4 text-xs">
               <div className="bg-white/10 px-3 py-1.5 rounded-lg border border-white/10">
                 <span className="text-slate-300 block text-[10px]">Chhatrapati Sambhajinagar (HQ)</span>
                 <span className="font-bold text-emerald-400">3.2 Days <span className="text-[10px] text-slate-300 font-normal">(-14.8d vs baseline)</span></span>
@@ -103,6 +103,12 @@ export default function ExecutiveDashboard() {
                 <span className="text-slate-300 block text-[10px]">Nagpur Hub</span>
                 <span className="font-bold text-amber-400">4.1 Days <span className="text-[10px] text-slate-300 font-normal">(-13.9d)</span></span>
               </div>
+              <Link
+                href="/portal/Company%20B"
+                className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors"
+              >
+                Client Portal Link &rarr;
+              </Link>
             </div>
           </div>
         </div>
