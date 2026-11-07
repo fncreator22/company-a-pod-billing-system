@@ -110,25 +110,20 @@ export default function ReviewQueuePage() {
   const groundedBoxes = verifData.grounded_boxes || [];
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-8 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="p-1.5 text-slate-500 hover:text-slate-900 border border-slate-200 bg-white rounded-lg">
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-          <div>
-            <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              POD Exception Review Workspace
-              <span className="text-[10px] bg-transport-blue/10 text-transport-blue px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> AI Visual Grounding
-              </span>
-            </h1>
-            <p className="text-xs text-slate-500">Inspect original photographs with AI bounding box overlays, resolve shortages, and adjust billing.</p>
-          </div>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            POD Exception Review Workspace
+            <span className="text-[10px] bg-transport-blue/10 text-transport-blue px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> AI Visual Grounding
+            </span>
+          </h1>
+          <p className="text-xs text-slate-500">Inspect original photographs with AI bounding box overlays, resolve shortages, and adjust billing.</p>
         </div>
         <button
           onClick={loadReviewQueue}
-          className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 rounded-lg text-xs font-semibold text-slate-700"
+          className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 rounded-lg text-xs font-semibold text-slate-700 shadow-sm"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh Queue
         </button>

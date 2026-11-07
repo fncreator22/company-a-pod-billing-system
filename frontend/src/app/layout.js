@@ -1,4 +1,5 @@
 import "./globals.css";
+import ShellLayout from "@/components/ShellLayout";
 
 export const metadata = {
   title: "Road Transport POD Management System",
@@ -9,7 +10,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
-        {children}
+        <ShellLayout>{children}</ShellLayout>
       </body>
     </html>
   );

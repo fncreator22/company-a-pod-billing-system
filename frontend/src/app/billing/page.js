@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Download, CheckCircle2, ArrowLeft, RefreshCw, FileText } from "lucide-react";
+import { Download, RefreshCw, FileText } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 
 export default function BillingQueuePage() {
@@ -40,7 +39,6 @@ export default function BillingQueuePage() {
       document.body.appendChild(a);
       a.click();
       a.remove();
-      // Reload queue to show updated exported statuses
       await loadBillingQueue();
     } catch (err) {
       alert("Failed to export: " + err.message);
@@ -50,16 +48,11 @@ export default function BillingQueuePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-8 max-w-6xl mx-auto">
+    <div className="p-6 md:p-8 max-w-6xl">
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="p-1.5 text-slate-500 hover:text-slate-900 border border-slate-200 bg-white rounded-lg">
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">Billing Queue & Tally Export</h1>
-            <p className="text-xs text-slate-500">Verified and executive-approved POD deliveries ready for billing.</p>
-          </div>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">Billing Queue & Tally Export</h1>
+          <p className="text-xs text-slate-500">Verified and executive-approved POD deliveries ready for billing.</p>
         </div>
 
         <div className="flex items-center gap-2">
