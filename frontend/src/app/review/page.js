@@ -115,8 +115,8 @@ export default function ReviewQueuePage() {
         <div>
           <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             POD Exception Review Workspace
-            <span className="text-[10px] bg-transport-blue/10 text-transport-blue px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> AI Visual Grounding
+            <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-mono border border-slate-200">
+              Visual Grounding Active
             </span>
           </h1>
           <p className="text-xs text-slate-500">Inspect original photographs with AI bounding box overlays, resolve shortages, and adjust billing.</p>

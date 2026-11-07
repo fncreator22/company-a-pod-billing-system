@@ -3,7 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Camera, RefreshCw, Upload, CheckCircle2, AlertTriangle, ShieldCheck, Volume2 } from "lucide-react";
+import { 
+  ArrowLeft, Camera, RefreshCw, Upload, CheckCircle2, 
+  AlertTriangle, ShieldCheck, Volume2, MapPin, Sparkles, 
+  HelpCircle, ChevronRight, FileCheck 
+} from "lucide-react";
 import { fetchWithAuth, uploadPodMultipart } from "@/lib/api";
 import { compressImage } from "@/lib/image-compression";
 import { savePendingPod } from "@/lib/offline-db";
@@ -26,7 +30,22 @@ export default function TripCapturePage() {
   const [gpsError, setGpsError] = useState(null);
   const fileInputRef = useRef(null);
 
-  // Auto-acquire GPS stamp on page load (HTML5 Geolocation)
+  useEffect(() => {
+    async function loadTripDetail() {
+      try {
+        setLoading(true);
+        const data = await fetchWithAuth(`/trips/${id}`, {}, "mock-driver-token");
+        setTrip(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadTripDetail();
+  }, [id]);
+
+  // Acquire GPS on arrival
   useEffect(() => {
     if (typeof window !== "undefined" && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -46,22 +65,6 @@ export default function TripCapturePage() {
     }
   }, []);
 
-  useEffect(() => {
-    async function loadTripDetail() {
-      try {
-        setLoading(true);
-        const data = await fetchWithAuth(`/trips/${id}`, {}, "mock-driver-token");
-        setTrip(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadTripDetail();
-  }, [id]);
-
-  // Native HTML5 Web Speech API Voice Prompt Helper (Zero Cost / Zero Deps)
   function playVoicePrompt(text, lang = "hi-IN") {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
@@ -140,109 +143,196 @@ export default function TripCapturePage() {
   }
 
   if (loading && !trip) {
-    return <div className="max-w-md mx-auto p-4 text-center py-20 text-slate-500">Loading trip details...</div>;
+    return (
+      <div className="max-w-md mx-auto p-6 min-h-screen bg-slate-900 text-slate-400 flex flex-col items-center justify-center">
+        <RefreshCw className="w-8 h-8 animate-spin text-blue-500 mb-3" />
+        <p className="text-sm font-medium">ट्रिप जानकारी लोड हो रही है...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="max-w-md mx-auto p-4 text-red-600 py-10">{error}</div>;
+    return (
+      <div className="max-w-md mx-auto p-6 min-h-screen bg-slate-900 text-red-400 flex flex-col items-center justify-center">
+        <AlertTriangle className="w-10 h-10 mb-2" />
+        <p className="text-sm">{error}</p>
+        <Link href="/driver" className="mt-4 text-xs underline text-slate-300">वापस जाएं (Back)</Link>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-md mx-auto p-4 min-h-screen flex flex-col justify-between">
+    <div className="max-w-md mx-auto min-h-screen flex flex-col justify-between bg-slate-900 text-slate-100 font-sans pb-6">
       <div>
-        {/* Top Back Link */}
-        <div className="flex items-center gap-2 pb-3 border-b border-slate-200">
-          <Link href="/driver" className="p-1 text-slate-500 hover:text-slate-900">
+        {/* Top Navbar */}
+        <div className="sticky top-0 z-20 bg-slate-900/90 backdrop-blur-md p-4 border-b border-slate-800 flex items-center justify-between">
+          <Link href="/driver" className="p-2 -ml-2 text-slate-400 hover:text-white rounded-xl bg-slate-800/80 border border-slate-700">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="font-bold text-base text-slate-900">Capture Proof of Delivery (POD)</h1>
+          <div className="text-center">
+            <h1 className="font-bold text-sm text-white">पीओडी फोटो कैप्चर (POD Capture)</h1>
+            <span className="text-[10px] text-amber-400 font-mono">{trip?.trip_number}</span>
+          </div>
+          <button
+            onClick={() => playVoicePrompt("कृपया डिलीवरी रसीद की साफ़ फोटो लें, जिस पर मुहर और हस्ताक्षर हों।")}
+            className="p-2 text-amber-400 hover:text-amber-300 rounded-xl bg-slate-800/80 border border-slate-700"
+            title="आवाज में निर्देश सुनें"
+          >
+            <Volume2 className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Trip Meta Card */}
-        {trip && (
-          <div className="my-3 p-3 bg-white border border-slate-200 rounded-xl">
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-xs font-bold text-slate-400">{trip.trip_number}</span>
-                <h2 className="font-bold text-slate-900 text-lg leading-tight">{trip.customer_name}</h2>
-                <p className="text-xs text-slate-600">{trip.goods_description} • {trip.destination}</p>
-                <p className="text-[11px] font-mono text-slate-400 mt-0.5">e-Way Bill: {trip.eway_bill_number || "EWB-66120412"}</p>
-              </div>
-              <div className="text-right">
-                <span className="text-xs font-mono font-bold text-slate-700">{trip.vehicle_number}</span>
-                <p className="text-[11px] text-slate-400">Exp. LR: {trip.expected_lr_number || "N/A"}</p>
-                {gpsCoords && (
-                  <span className="inline-block mt-1 text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-mono">
-                    📍 GPS Acquired
+        <div className="p-4 space-y-4">
+          {/* Trip Meta Card */}
+          {trip && (
+            <div className="bg-gradient-to-br from-slate-850 to-slate-800 rounded-3xl p-5 border border-slate-750 shadow-lg">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block">Consignee Delivery</span>
+                  <h2 className="text-xl font-extrabold text-white mt-0.5 leading-tight">{trip.customer_name}</h2>
+                  <p className="text-xs text-slate-300 mt-1">{trip.goods_description} • {trip.destination}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-slate-200 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700">
+                    {trip.vehicle_number}
                   </span>
+                  <p className="text-[10px] text-slate-400 mt-1.5 font-mono">LR: {trip.expected_lr_number || "LR-8821"}</p>
+                </div>
+              </div>
+
+              {/* GPS Gate Badge */}
+              <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 text-slate-400">
+                  <MapPin className="w-4 h-4 text-emerald-400" />
+                  <span>Gate GPS Stamp:</span>
+                </div>
+                {gpsCoords ? (
+                  <span className="font-mono text-emerald-400 font-bold bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-800/60 text-[11px]">
+                    📍 {gpsCoords.latitude.toFixed(4)}, {gpsCoords.longitude.toFixed(4)}
+                  </span>
+                ) : (
+                  <span className="text-slate-400 text-[11px]">{gpsError || "Detecting gate..."}</span>
                 )}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Verification Outcome View */}
-        {uploadResult ? (
-          <div className="my-6 p-5 bg-white border border-slate-200 rounded-2xl text-center shadow-sm">
-            {uploadResult.verification_status === "verified" && (
-              <div>
-                <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto mb-3" />
-                <h3 className="font-bold text-lg text-slate-900">POD Verified!</h3>
-                <p className="text-xs text-slate-500 mt-1">Stamps, signature, and LR matched. Delivery is ready for billing.</p>
+          {/* Verification Outcome Card */}
+          {uploadResult ? (
+            <div className="p-6 bg-slate-850 border border-slate-750 rounded-3xl text-center shadow-xl animate-in fade-in duration-300">
+              {uploadResult.verification_status === "verified" && (
+                <div>
+                  <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-3xl flex items-center justify-center mx-auto mb-3 border border-emerald-500/30">
+                    <CheckCircle2 className="w-10 h-10" />
+                  </div>
+                  <h3 className="font-extrabold text-xl text-white">सत्यापित! (POD Verified)</h3>
+                  <p className="text-xs text-slate-300 mt-1.5">
+                    मुहर, हस्ताक्षर और बिल्टी नंबर सत्यापित हो चुके हैं। बिलिंग के लिए तैयार है।
+                  </p>
+                  <button
+                    onClick={() => playVoicePrompt("धन्यवाद, पीओडी सफलतापूर्वक सत्यापित हो गई है।")}
+                    className="mt-4 text-xs text-emerald-300 font-bold inline-flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-800 px-4 py-2 rounded-2xl shadow"
+                  >
+                    <Volume2 className="w-4 h-4" /> आवाज में सुनें (Listen)
+                  </button>
+                  <Link
+                    href="/driver"
+                    className="mt-5 block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 rounded-2xl text-sm shadow-lg shadow-emerald-950/40"
+                  >
+                    अगली ट्रिप देखें (Back to Trips)
+                  </Link>
+                </div>
+              )}
+
+              {uploadResult.verification_status === "retake_requested" && (
+                <div>
+                  <div className="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-3xl flex items-center justify-center mx-auto mb-3 border border-amber-500/30 animate-pulse">
+                    <AlertTriangle className="w-10 h-10" />
+                  </div>
+                  <h3 className="font-extrabold text-xl text-white">दोबारा फोटो लें (Retake Requested)</h3>
+                  <p className="text-xs text-slate-300 mt-1.5">
+                    रसीद पर ग्राहक की मुहर या हस्ताक्षर साफ़ नहीं दिख रहे हैं।
+                  </p>
+                  <button
+                    onClick={() => playVoicePrompt("कृपया दोबारा फोटो लें, मुहर साफ़ नहीं दिख रही है।")}
+                    className="mt-4 text-xs text-amber-300 font-bold inline-flex items-center gap-1.5 bg-amber-950/80 border border-amber-800 px-4 py-2 rounded-2xl shadow"
+                  >
+                    <Volume2 className="w-4 h-4" /> आवाज में सुनें (Listen)
+                  </button>
+                  <button
+                    onClick={() => { setUploadResult(null); setCapturedBlob(null); setPreviewUrl(null); }}
+                    className="mt-5 w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold py-3.5 rounded-2xl text-sm shadow-lg shadow-amber-950/40"
+                  >
+                    कैमरा खोलें व दोबारा फोटो लें
+                  </button>
+                </div>
+              )}
+
+              {uploadResult.verification_status === "needs_review" && (
+                <div>
+                  <div className="w-16 h-16 bg-blue-500/20 text-blue-400 rounded-3xl flex items-center justify-center mx-auto mb-3 border border-blue-500/30">
+                    <ShieldCheck className="w-10 h-10" />
+                  </div>
+                  <h3 className="font-extrabold text-xl text-white">कार्यालय समीक्षा (Sent for Review)</h3>
+                  <p className="text-xs text-slate-300 mt-1.5">
+                    शॉर्टेज या रिमार्क दर्ज हुआ है। कार्यालय टीम इसकी जांच करेगी।
+                  </p>
+                  <button
+                    onClick={() => playVoicePrompt("पीओडी जमा हो गई है, कार्यालय टीम इसकी जांच करेगी।")}
+                    className="mt-4 text-xs text-blue-300 font-bold inline-flex items-center gap-1.5 bg-blue-950/80 border border-blue-800 px-4 py-2 rounded-2xl shadow"
+                  >
+                    <Volume2 className="w-4 h-4" /> आवाज में सुनें (Listen)
+                  </button>
+                  <Link
+                    href="/driver"
+                    className="mt-5 block w-full bg-slate-800 hover:bg-slate-700 text-white font-extrabold py-3.5 rounded-2xl text-sm border border-slate-700"
+                  >
+                    डैशबोर्ड पर वापस जाएं
+                  </Link>
+                </div>
+              )}
+            </div>
+          ) : previewUrl ? (
+            /* Image Preview & Submit View */
+            <div className="bg-slate-850 rounded-3xl p-4 border border-slate-750 shadow-xl space-y-4">
+              <div className="relative rounded-2xl overflow-hidden bg-black aspect-[3/4] flex items-center justify-center border border-slate-700">
+                <img src={previewUrl} alt="POD Preview" className="w-full h-full object-contain" />
+                <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-mono font-bold text-amber-300 border border-slate-750">
+                  {compressedSizeKB} KB
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs px-1 text-slate-400">
+                <span>कंप्रेस्ड साइज: <strong className="text-slate-200">{compressedSizeKB} KB</strong> (&lt;300 KB)</span>
                 <button
-                  onClick={() => playVoicePrompt("धन्यवाद, पीओडी सफलतापूर्वक सत्यापित हो गई है।")}
-                  className="mt-3 text-xs text-slate-600 font-medium inline-flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200"
+                  onClick={() => { setCapturedBlob(null); setPreviewUrl(null); }}
+                  className="text-red-400 font-bold hover:underline"
                 >
-                  <Volume2 className="w-3.5 h-3.5 text-emerald-600" /> आवाज में सुनें (Listen)
+                  रद्द करें (Cancel)
                 </button>
               </div>
-            )}
 
-            {uploadResult.verification_status === "retake_requested" && (
-              <div>
-                <AlertTriangle className="w-14 h-14 text-amber-500 mx-auto mb-3" />
-                <h3 className="font-bold text-lg text-slate-900">Retake Requested</h3>
-                <p className="text-xs text-slate-500 mt-1">Consignee stamp or signature was not clear in the photograph.</p>
-                <button
-                  onClick={() => playVoicePrompt("कृपया दोबारा फोटो लें, मुहर साफ़ नहीं दिख रही है।")}
-                  className="mt-3 text-xs text-slate-600 font-medium inline-flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200"
-                >
-                  <Volume2 className="w-3.5 h-3.5 text-amber-600" /> आवाज में सुनें (Listen)
-                </button>
-                <button
-                  onClick={() => { setUploadResult(null); setCapturedBlob(null); setPreviewUrl(null); }}
-                  className="mt-4 w-full bg-slate-900 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5"
-                >
-                  <RefreshCw className="w-4 h-4" /> Take Another Photo (Attempt 2 of 3)
-                </button>
-              </div>
-            )}
-
-            {uploadResult.verification_status === "needs_review" && (
-              <div>
-                <ShieldCheck className="w-14 h-14 text-blue-500 mx-auto mb-3" />
-                <h3 className="font-bold text-lg text-slate-900">Submitted for Office Review</h3>
-                <p className="text-xs text-slate-500 mt-1">Document submitted with shortage remarks. The billing team will inspect.</p>
-                <button
-                  onClick={() => playVoicePrompt("पीओडी जमा हो गई है, कार्यालय टीम इसकी जांच करेगी।")}
-                  className="mt-3 text-xs text-slate-600 font-medium inline-flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200"
-                >
-                  <Volume2 className="w-3.5 h-3.5 text-blue-600" /> आवाज में सुनें (Listen)
-                </button>
-              </div>
-            )}
-
-            <Link
-              href="/driver"
-              className="mt-6 block w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2.5 rounded-xl text-xs"
-            >
-              Back to Assigned Trips
-            </Link>
-          </div>
-        ) : (
-          <div>
-            {/* Camera / Photo Preview Zone */}
-            <div className="my-4">
+              <button
+                onClick={handleSubmitPod}
+                disabled={uploading}
+                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-extrabold py-4 rounded-2xl text-base flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 disabled:opacity-50 active:scale-[0.98] transition-transform"
+              >
+                {uploading ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    <span>AI जांच जारी है (Checking with AI)...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-5 h-5" />
+                    <span>पीओडी जमा करें (Submit Stamped POD)</span>
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            /* Big Tap Target Capture Button */
+            <div className="space-y-4 pt-2">
               <input
                 type="file"
                 accept="image/*"
@@ -252,59 +342,40 @@ export default function TripCapturePage() {
                 className="hidden"
               />
 
-              {!previewUrl ? (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-slate-300 hover:border-slate-400 bg-white rounded-2xl p-10 text-center cursor-pointer flex flex-col items-center justify-center transition-colors"
-                >
-                  <Camera className="w-12 h-12 text-slate-400 mb-2" />
-                  <span className="font-bold text-sm text-slate-800">Tap to Take POD Photo</span>
-                  <p className="text-xs text-slate-400 mt-1">Make sure stamp and signature are clearly visible</p>
-                </div>
-              ) : (
-                <div className="bg-white p-3 border border-slate-200 rounded-2xl shadow-sm">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={previewUrl}
-                    alt="Captured POD Preview"
-                    className="w-full h-64 object-cover rounded-xl border border-slate-100"
-                  />
-                  <div className="flex justify-between items-center mt-3 pt-2 border-t border-slate-100 text-xs text-slate-500">
-                    <span>Compressed: <strong className="text-slate-800">{compressedSizeKB} KB</strong> (&lt; 300 KB limit)</span>
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="text-transport-blue font-semibold flex items-center gap-1"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" /> Retake
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Submit Action */}
-            {previewUrl && (
               <button
-                onClick={handleSubmitPod}
-                disabled={uploading}
-                className="w-full mt-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-sm transition-all"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full bg-gradient-to-b from-blue-600 to-transport-blue hover:from-blue-500 hover:to-blue-600 text-white rounded-3xl p-10 flex flex-col items-center justify-center gap-4 shadow-xl shadow-blue-950/60 active:scale-95 transition-all border border-blue-400/30 group"
               >
-                {uploading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    AI Verifying Document...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4" />
-                    Confirm & Submit POD
-                  </>
-                )}
+                <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform">
+                  <Camera className="w-10 h-10 text-white" />
+                </div>
+                <div className="text-center">
+                  <span className="block text-2xl font-black tracking-wide">कैमरा खोलें (TAP TO CAPTURE)</span>
+                  <span className="text-xs text-blue-100 font-medium tracking-wider uppercase mt-1 block">
+                    Deliver Receipt & Lorry Receipt
+                  </span>
+                </div>
               </button>
-            )}
-          </div>
-        )}
+
+              <div className="bg-slate-800/60 rounded-2xl p-4 border border-slate-700/60 text-xs text-slate-300 space-y-2">
+                <div className="flex items-center gap-2 text-amber-400 font-bold">
+                  <Sparkles className="w-4 h-4 shrink-0" />
+                  <span>फोटो लेते समय ध्यान दें:</span>
+                </div>
+                <ul className="space-y-1 text-[11px] text-slate-400 pl-5 list-disc">
+                  <li>ग्राहक की मुहर (Consignee Stamp) साफ़ दिखनी चाहिए।</li>
+                  <li>हस्ताक्षर (Signature) और तारीख कटी हुई न हो।</li>
+                  <li>कैमरे को सीधा रखें ताकि रोशनी में परछाई न आए।</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      <footer className="text-center py-2 text-[11px] text-slate-500 font-medium">
+        Company A Road Logistics • छत्रपति संभाजीनगर
+      </footer>
     </div>
   );
 }
