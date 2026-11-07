@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Camera, RefreshCw, Upload, CheckCircle2, AlertTriangle, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Camera, RefreshCw, Upload, CheckCircle2, AlertTriangle, ShieldCheck, Volume2 } from "lucide-react";
 import { fetchWithAuth, uploadPodMultipart } from "@/lib/api";
 import { compressImage } from "@/lib/image-compression";
 import { savePendingPod } from "@/lib/offline-db";
@@ -39,13 +39,23 @@ export default function TripCapturePage() {
     loadTripDetail();
   }, [id]);
 
+  // Native HTML5 Web Speech API Voice Prompt Helper (Zero Cost / Zero Deps)
+  function playVoicePrompt(text, lang = "hi-IN") {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+      utterance.rate = 0.95;
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
   async function handleFileSelected(e) {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
       setLoading(true);
-      // Run Canvas progressive compression (<300 KB)
       const { blob, sizeBytes } = await compressImage(file, 300);
       setCapturedBlob(blob);
       setCompressedSizeKB(Math.round(sizeBytes / 1024));
@@ -63,9 +73,7 @@ export default function TripCapturePage() {
     const clientUploadId = crypto.randomUUID();
     const captureTime = new Date().toISOString();
 
-    // Check online status
     if (!navigator.onLine) {
-      // Save in offline IndexedDB store
       await savePendingPod({
         client_upload_id: clientUploadId,
         trip_id: trip.id,
@@ -73,6 +81,7 @@ export default function TripCapturePage() {
         capture_time: captureTime,
         status: "pending_upload"
       });
+      playVoicePrompt("पीओडी फ़ोन में सुरक्षित हो गई है। नेटवर्क आने पर अपलोड होगी।");
       alert("You are offline. POD saved locally on this device. It will upload once you're back online!");
       router.push("/driver");
       return;
@@ -88,6 +97,14 @@ export default function TripCapturePage() {
     try {
       const res = await uploadPodMultipart(formData, false);
       setUploadResult(res);
+
+      if (res.verification_status === "verified") {
+        playVoicePrompt("धन्यवाद, पीओडी सफलतापूर्वक सत्यापित हो गई है।");
+      } else if (res.verification_status === "retake_requested") {
+        playVoicePrompt("कृपया दोबारा फोटो लें, मुहर साफ़ नहीं दिख रही है।");
+      } else if (res.verification_status === "needs_review") {
+        playVoicePrompt("पीओडी जमा हो गई है, कार्यालय टीम इसकी जांच करेगी।");
+      }
     } catch (err) {
       alert("Upload failed: " + err.message);
     } finally {
@@ -139,6 +156,12 @@ export default function TripCapturePage() {
                 <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto mb-3" />
                 <h3 className="font-bold text-lg text-slate-900">POD Verified!</h3>
                 <p className="text-xs text-slate-500 mt-1">Stamps, signature, and LR matched. Delivery is ready for billing.</p>
+                <button
+                  onClick={() => playVoicePrompt("धन्यवाद, पीओडी सफलतापूर्वक सत्यापित हो गई है।")}
+                  className="mt-3 text-xs text-slate-600 font-medium inline-flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200"
+                >
+                  <Volume2 className="w-3.5 h-3.5 text-emerald-600" /> आवाज में सुनें (Listen)
+                </button>
               </div>
             )}
 
@@ -147,6 +170,12 @@ export default function TripCapturePage() {
                 <AlertTriangle className="w-14 h-14 text-amber-500 mx-auto mb-3" />
                 <h3 className="font-bold text-lg text-slate-900">Retake Requested</h3>
                 <p className="text-xs text-slate-500 mt-1">Consignee stamp or signature was not clear in the photograph.</p>
+                <button
+                  onClick={() => playVoicePrompt("कृपया दोबारा फोटो लें, मुहर साफ़ नहीं दिख रही है।")}
+                  className="mt-3 text-xs text-slate-600 font-medium inline-flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200"
+                >
+                  <Volume2 className="w-3.5 h-3.5 text-amber-600" /> आवाज में सुनें (Listen)
+                </button>
                 <button
                   onClick={() => { setUploadResult(null); setCapturedBlob(null); setPreviewUrl(null); }}
                   className="mt-4 w-full bg-slate-900 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5"
@@ -160,7 +189,13 @@ export default function TripCapturePage() {
               <div>
                 <ShieldCheck className="w-14 h-14 text-blue-500 mx-auto mb-3" />
                 <h3 className="font-bold text-lg text-slate-900">Submitted for Office Review</h3>
-                <p className="text-xs text-slate-500 mt-1">Document submitted with shortage remarks or notes. The billing team will inspect.</p>
+                <p className="text-xs text-slate-500 mt-1">Document submitted with shortage remarks. The billing team will inspect.</p>
+                <button
+                  onClick={() => playVoicePrompt("पीओडी जमा हो गई है, कार्यालय टीम इसकी जांच करेगी।")}
+                  className="mt-3 text-xs text-slate-600 font-medium inline-flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200"
+                >
+                  <Volume2 className="w-3.5 h-3.5 text-blue-600" /> आवाज में सुनें (Listen)
+                </button>
               </div>
             )}
 

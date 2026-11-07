@@ -39,7 +39,14 @@ class TripImportSummary(BaseModel):
     skipped_count: int
     errors: List[str]
 
-# --- AI Extraction & Verification ---
+# --- AI Extraction & Grounding (Visual Bounding Boxes) ---
+class BoundingBox(BaseModel):
+    ymin: float = Field(0.0, description="Normalized top coordinate [0.0 - 1.0]")
+    xmin: float = Field(0.0, description="Normalized left coordinate [0.0 - 1.0]")
+    ymax: float = Field(1.0, description="Normalized bottom coordinate [0.0 - 1.0]")
+    xmax: float = Field(1.0, description="Normalized right coordinate [0.0 - 1.0]")
+    label: str
+
 class DocumentVerificationResult(BaseModel):
     lr_number: Optional[str] = None
     lr_number_confidence: float = 0.0
@@ -53,6 +60,8 @@ class DocumentVerificationResult(BaseModel):
     remarks: Optional[str] = None
     delivery_date: Optional[str] = None
     overall_confidence: float = 0.0
+    # Visual Grounding Bounding Boxes (AI Era Feature)
+    grounded_boxes: List[BoundingBox] = []
 
 def create_timeout_verification(error_msg: str = "AI_TIMEOUT") -> DocumentVerificationResult:
     return DocumentVerificationResult(
